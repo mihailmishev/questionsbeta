@@ -129,4 +129,207 @@
     margin-bottom: 10px;
   }
 
-  .question
+  .question img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 12px;
+  }
+
+  .options button {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: var(--card-color);
+    color: var(--text-color);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .options button:hover:not(:disabled) { background-color: var(--option-hover); }
+
+  .options button.correct { background-color: var(--correct-color); color: #fff; }
+  .options button.wrong { background-color: var(--wrong-color); color: #fff; }
+  .options button.disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
+
+  #nextBtn, #restartBtn, #randomBtn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 12px;
+    cursor: pointer;
+    border: none;
+    margin-top: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+
+  #nextBtn { background-color: var(--next-btn-color); color: #fff; }
+  #nextBtn:hover { background-color: #45a049; }
+
+  #restartBtn { background-color: var(--restart-btn-color); color: #fff; }
+  #restartBtn:hover { background-color: #666; }
+
+  #randomBtn { background-color: var(--random-btn-color); color: #fff; }
+  #randomBtn:hover { background-color: #1976D2; }
+
+  #loading {
+    text-align: center;
+    font-size: 1.2em;
+    margin-top: 50px;
+  }
+</style>
+</head>
+<body>
+<div class="container" id="quizContainer" style="display:none;">
+  <div class="header">
+    <div id="counter">Question 1/1</div>
+    <button class="dark-toggle" onclick="toggleDarkMode()">Dark Mode</button>
+  </div>
+
+  <button id="showQuestionsBtn" onclick="toggleQuestionsGrid()">Show Questions</button>
+  <div class="questions-grid" id="questionsGrid"></div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="question" id="question"></div>
+  <div class="options" id="options"></div>
+
+  <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+  <button id="randomBtn" onclick="loadRandomQuestion()">Random Question</button>
+  <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
+</div>
+
+<div id="loading">Loading questions...</div>
+
+<script>
+let questions = [];
+let current = 0;
+let score = 0;
+const imageQuestions = [102,127,128,293,320,361]; // only these show images
+
+// Fetch CSV from Google Sheets
+fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSGovyAXUEPrHKj8qH2VEITgb424ghBN_uWJWQzYgkAL9qRKMmmt9jFeldMdO-L1-Rd522rTdyrIyYH/pub?output=csv')
+  .then(res => res.text())
+  .then(data => {
+    parseCSV(data);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'flex';
+    loadQuestion();
+    createQuestionGrid();
+  });
+
+function parseCSV(csv) {
+  const lines = csv.split('\n');
+  const headers = lines.shift().split(',');
+  lines.forEach((line, idx)=>{
+    if(!line.trim()) return;
+    const row = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // handle commas inside quotes
+    const qObj = {
+      q: row[0],
+      options: [row[1], row[2], row[3], row[4]],
+      answer: row[5],
+      img: imageQuestions.includes(idx+1) ? row[6] : null
+    };
+    questions.push(qObj);
+  });
+}
+
+function loadQuestion() {
+  const q = questions[current];
+  const questionDiv = document.getElementById("question");
+  questionDiv.innerHTML = q.q;
+
+  if(q.img){
+    const img = document.createElement("img");
+    img.src = q.img;
+    questionDiv.appendChild(img);
+  }
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+  q.options.forEach(opt=>{
+    const btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = ()=>checkAnswer(btn,opt);
+    optionsDiv.appendChild(btn);
+  });
+
+  document.getElementById("nextBtn").disabled = true;
+  updateProgress();
+}
+
+function checkAnswer(btn, selected) {
+  const q = questions[current];
+  const buttons = document.querySelectorAll(".options button");
+  buttons.forEach(b=>{
+    b.disabled = true;
+    b.classList.add("disabled");
+    if(b.innerText === q.answer) b.classList.add("correct");
+    else if(b.innerText === selected) b.classList.add("wrong");
+  });
+  if(selected===q.answer) score++;
+  document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQuestion() {
+  current++;
+  if(current < questions.length) loadQuestion();
+  else document.querySelector(".container").innerHTML = `
+    <h2>Quiz Finished!</h2>
+    <p>Your Score: ${score} / ${questions.length}</p>
+    <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
+  `;
+}
+
+function loadRandomQuestion() {
+  if(questions.length <= 1) return;
+  let randomIndex;
+  do {
+    randomIndex = Math.floor(Math.random() * questions.length);
+  } while(randomIndex === current);
+  current = randomIndex;
+  loadQuestion();
+}
+
+function restartQuiz() {
+  current=0;
+  score=0;
+  location.reload();
+}
+
+function updateProgress() {
+  document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
+  document.getElementById("progressBar").style.width = `${((current)/questions.length)*100}%`;
+}
+
+function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
+
+function toggleQuestionsGrid() {
+  const grid = document.getElementById("questionsGrid");
+  grid.style.display = grid.style.display==="block" ? "none" : "block";
+}
+
+function createQuestionGrid() {
+  const gridDiv = document.getElementById("questionsGrid");
+  questions.forEach((q, idx)=>{
+    const btn = document.createElement("button");
+    btn.innerText = idx+1;
+    btn.onclick = ()=>{
+      current = idx;
+      loadQuestion();
+      gridDiv.style.display = "none";
+    };
+    gridDiv.appendChild(btn);
+  });
+}
+</script>
+</body>
+</html>
