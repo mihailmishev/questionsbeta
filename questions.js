@@ -100,4 +100,7 @@ const questions = [
   {"q":"Which process involves the creation of a document that provides the project manager with the authority to apply resources to a project?","options":["Define Activities","Direct and Manage Project Work","Develop Project Management Plan","Develop Project Charter"],"answer":"Develop Project Charter"},
   {"q":"The only Process Group that comprises processes that typically occur from the beginning to the end of the project life cycle is:","options":["Planning","Executing","Monitoring and Controlling","Closing"],"answer":"Planning"},
   {"q":"Which quality planning tools and techniques are used to visually identify logical groupings based on natural relationships?","options":["Force field diagrams","Cause-and-effect diagrams","Affinity diagrams","Nominal group techniques"],"answer":"Affinity diagrams"}
+  {"q": "The following is a network diagram for a project.\n\nWhat is the critical path for the project?\n\n[Image will be displayed below]", "options": ["A-B-D-G", "A-B-E-G", "A-C-F-G", "A-C-E-G"], "answer": "A-C-F-G", "img": "images/question102.jpg"  // Add your uploaded image path here
+}
+
 ];
