@@ -17,14 +17,12 @@
     --restart-btn-color: #888;
     --random-btn-color: #2196F3;
   }
-
   body.dark-mode {
     --bg-color: #121212;
     --text-color: #eee;
     --card-color: #1e1e1e;
     --option-hover: #333;
   }
-
   body {
     margin: 0;
     padding: 10px;
@@ -35,7 +33,6 @@
     justify-content: center;
     min-height: 100vh;
   }
-
   .container {
     background-color: var(--card-color);
     width: 100%;
@@ -46,14 +43,12 @@
     display: flex;
     flex-direction: column;
   }
-
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
   }
-
   .dark-toggle {
     cursor: pointer;
     background-color: transparent;
@@ -63,14 +58,25 @@
     font-size: 0.9em;
     color: var(--text-color);
   }
-
+  #showQuestionsBtn {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    background-color: var(--card-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: none;
+    transition: all 0.3s ease;
+    align-self: flex-start;
+  }
+  #showQuestionsBtn:hover { background-color: var(--option-hover); }
   .questions-grid {
     display: none;
     max-height: 180px;
     overflow-y: auto;
     margin-bottom: 10px;
   }
-
   .questions-grid button {
     width: 40px;
     height: 40px;
@@ -84,14 +90,11 @@
     transition: all 0.3s ease;
     font-size: 0.9em;
   }
-
   .questions-grid button:hover { background-color: var(--option-hover); }
-
   body.dark-mode .questions-grid button {
     background-color: #2a2a2a;
     color: #eee;
   }
-
   .progress-container {
     width: 100%;
     background-color: #ddd;
@@ -100,7 +103,6 @@
     overflow: hidden;
     margin-bottom: 15px;
   }
-
   .progress-bar {
     height: 100%;
     width: 0%;
@@ -108,19 +110,16 @@
     border-radius: 20px;
     transition: width 0.3s ease;
   }
-
   .question {
     font-size: 1.1em;
     margin-bottom: 10px;
   }
-
   .question img {
     max-width: 100%;
     height: auto;
     margin: 10px 0;
     border-radius: 12px;
   }
-
   .options button {
     display: block;
     width: 100%;
@@ -135,13 +134,10 @@
     border: none;
     transition: all 0.3s ease;
   }
-
   .options button:hover:not(:disabled) { background-color: var(--option-hover); }
-
   .options button.correct { background-color: var(--correct-color); color: #fff; }
   .options button.wrong { background-color: var(--wrong-color); color: #fff; }
   .options button.disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
-
   #nextBtn, #restartBtn, #randomBtn {
     width: 100%;
     padding: 12px;
@@ -153,13 +149,10 @@
     box-shadow: 0 3px 6px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
   }
-
   #nextBtn { background-color: var(--next-btn-color); color: #fff; }
   #nextBtn:hover { background-color: #45a049; }
-
   #restartBtn { background-color: var(--restart-btn-color); color: #fff; }
   #restartBtn:hover { background-color: #666; }
-
   #randomBtn { background-color: var(--random-btn-color); color: #fff; }
   #randomBtn:hover { background-color: #1976D2; }
 </style>
@@ -186,37 +179,30 @@
   <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-// Google Sheets CSV URL
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGovyAXUEPrHKj8qH2VEITgb424ghBN_uWJWQzYgkAL9qRKMmmt9jFeldMdO-L1-Rd522rTdyrIyYH/pub?output=csv";
-
 let questions = [];
 let current = 0;
 let score = 0;
-const questionsWithImages = [102,127,128,293,320,361]; // only these show images
+const imageQuestions = [102,127,128,293,320,361];
 
-// Fetch CSV and parse
-fetch(csvUrl)
-.then(res => res.text())
-.then(data => {
-  const rows = data.split("\n").slice(1); // skip header
-  rows.forEach((row, idx)=>{
-    const cols = row.split(",");
-    if(cols.length >= 6){
-      const qObj = {
-        q: cols[0],
-        options: [cols[1],cols[2],cols[3],cols[4]],
-        answer: cols[5].trim(),
-        img: questionsWithImages.includes(idx+1) ? (cols[6]?.trim() || "") : ""
-      };
-      questions.push(qObj);
-    }
-  });
-  loadQuestion();
-  populateQuestionsGrid();
+// Load questions from Google Sheets CSV
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGovyAXUEPrHKj8qH2VEITgb424ghBN_uWJWQzYgkAL9jFeldMdO-L1-Rd522rTdyrIyYH/pub?output=csv";
+Papa.parse(csvUrl, {
+  download: true,
+  header: true,
+  complete: function(results) {
+    questions = results.data.map((row, idx) => ({
+      q: row.Question,
+      options: [row.A,row.B,row.C,row.D],
+      answer: row.Answer,
+      img: imageQuestions.includes(idx+1) ? row.Images : null
+    }));
+    loadQuestion();
+    populateGrid();
+  }
 });
 
-// Load question
 function loadQuestion() {
   const q = questions[current];
   const questionDiv = document.getElementById("question");
@@ -241,27 +227,31 @@ function loadQuestion() {
   updateProgress();
 }
 
-// Check answer
 function checkAnswer(btn, selected) {
   const q = questions[current];
   const buttons = document.querySelectorAll(".options button");
 
-  buttons.forEach(b=>{
-    b.disabled = true; // disable all
-    b.classList.remove("correct","wrong");
+  buttons.forEach(b => {
+    b.disabled = true;
 
-    if(b.innerText === q.answer) b.classList.add("correct");
-    else if(b.innerText === selected) b.classList.add("wrong");
+    b.classList.remove("correct", "wrong", "disabled");
+
+    if (b.innerText === q.answer) {
+      b.classList.add("correct");
+    } else if (b.innerText === selected && selected !== q.answer) {
+      b.classList.add("wrong");
+    } else {
+      b.classList.add("disabled");
+    }
   });
 
-  if(selected === q.answer) score++;
+  if (selected === q.answer) score++;
   document.getElementById("nextBtn").disabled = false;
 }
 
-// Next question
 function nextQuestion() {
   current++;
-  if(current < questions.length) loadQuestion();
+  if(current<questions.length) loadQuestion();
   else document.querySelector(".container").innerHTML = `
     <h2>Quiz Finished!</h2>
     <p>Your Score: ${score} / ${questions.length}</p>
@@ -269,7 +259,6 @@ function nextQuestion() {
   `;
 }
 
-// Random question
 function loadRandomQuestion() {
   if(questions.length <= 1) return;
   let randomIndex;
@@ -280,30 +269,25 @@ function loadRandomQuestion() {
   loadQuestion();
 }
 
-// Restart
 function restartQuiz() {
   current=0;
   score=0;
   location.reload();
 }
 
-// Progress
 function updateProgress() {
   document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
   document.getElementById("progressBar").style.width = `${((current)/questions.length)*100}%`;
 }
 
-// Dark mode
 function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
 
-// Show/hide questions grid
 function toggleQuestionsGrid() {
   const grid = document.getElementById("questionsGrid");
   grid.style.display = grid.style.display==="block" ? "none" : "block";
 }
 
-// Populate question grid
-function populateQuestionsGrid() {
+function populateGrid() {
   const gridDiv = document.getElementById("questionsGrid");
   questions.forEach((q, idx)=>{
     const btn = document.createElement("button");
