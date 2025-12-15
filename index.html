@@ -6,11 +6,10 @@
 <title>Project Management Quiz</title>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
-  /* Keep your existing styles here */
   body { font-family: sans-serif; background: #f5f5f5; padding: 20px; }
   .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
   .question img { max-width: 100%; margin-top: 10px; }
-  button { display: block; margin: 5px 0; padding: 10px; }
+  button { display: block; margin: 5px 0; padding: 10px; cursor: pointer; }
   .correct { background: #4caf50; color: #fff; }
   .wrong { background: #f44336; color: #fff; }
   .disabled { opacity: 0.5; cursor: not-allowed; }
@@ -32,7 +31,6 @@ let current = 0;
 let score = 0;
 const imageQuestions = [102,127,128,293,320,361]; // only these questions show images
 
-// Use PapaParse to fetch and parse CSV
 Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vSGovyAXUEPrHKj8qH2VEITgb424ghBN_uWJWQzYgkAL9qRKMmmt9jFeldMdO-L1-Rd522rTdyrIyYH/pub?output=csv", {
   download: true,
   header: true,
@@ -52,6 +50,7 @@ Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vSGovyAXUEPrHKj8qH2V
 function loadQuestion() {
   const q = questions[current];
   document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
+  
   const questionDiv = document.getElementById("question");
   questionDiv.innerHTML = q.q;
   if(q.img) {
@@ -65,22 +64,27 @@ function loadQuestion() {
   q.options.forEach(opt => {
     const btn = document.createElement("button");
     btn.innerText = opt;
-    btn.onclick = () => checkAnswer(btn,opt);
+    btn.onclick = () => checkAnswer(btn, opt);
     optionsDiv.appendChild(btn);
   });
 
   document.getElementById("nextBtn").disabled = true;
 }
 
-function checkAnswer(btn, selected) {
+function checkAnswer(clickedBtn, selected) {
   const q = questions[current];
   const buttons = document.querySelectorAll(".options button");
-  buttons.forEach(b=>{
+  
+  buttons.forEach(b => {
+    if(b === clickedBtn) {
+      if(selected === q.answer) b.classList.add("correct");
+      else b.classList.add("wrong");
+    } else if(b.innerText === q.answer) {
+      b.classList.add("correct");
+    }
     b.disabled = true;
-    b.classList.add("disabled");
-    if(b.innerText === q.answer) b.classList.add("correct");
-    else if(b.innerText === selected) b.classList.add("wrong");
   });
+
   if(selected === q.answer) score++;
   document.getElementById("nextBtn").disabled = false;
 }
