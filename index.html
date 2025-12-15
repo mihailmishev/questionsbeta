@@ -21,6 +21,35 @@ body {
   width: 100%;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+#counter { font-weight: bold; }
+.questions-grid {
+  margin: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+.questions-grid button {
+  width: 35px;
+  height: 35px;
+  margin: 2px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #eee;
+}
+.questions-grid button:hover { background: #ddd; }
+.progress-bar {
+  height: 12px;
+  background: #4caf50;
+  width: 0%;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  transition: width 0.3s;
+}
 .question {
   margin-bottom: 15px;
   font-size: 1.1em;
@@ -52,24 +81,23 @@ body {
 }
 #restartBtn { background: #888; }
 #randomBtn { background: #2196F3; }
-.progress-bar {
-  height: 12px;
-  background: #4caf50;
-  width: 0%;
-  margin-bottom: 15px;
-  border-radius: 6px;
-  transition: width 0.3s;
-}
 img { max-width: 100%; margin-top: 10px; border-radius: 8px; }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <div id="counter">Question 1/1</div>
+  <div class="header">
+    <div id="counter">Question 1/1</div>
+  </div>
+
+  <div class="questions-grid" id="questionsGrid"></div>
+
   <div class="progress-bar" id="progressBar"></div>
+
   <div class="question" id="question"></div>
   <div class="options" id="options"></div>
+
   <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
   <button id="randomBtn" onclick="loadRandomQuestion()">Random Question</button>
   <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
@@ -86,6 +114,7 @@ function loadQuestion() {
   questionDiv.innerHTML = q.q;
 
   // Only show image if exists
+  questionDiv.querySelectorAll("img").forEach(img=>img.remove());
   if(q.img) {
     const img = document.createElement("img");
     img.src = q.img;
@@ -104,6 +133,7 @@ function loadQuestion() {
 
   document.getElementById("nextBtn").disabled = true;
   updateProgress();
+  highlightCurrentQuestionButton();
 }
 
 function checkAnswer(btn, selected) {
@@ -144,12 +174,31 @@ function loadRandomQuestion() {
 function restartQuiz() {
   current = 0;
   score = 0;
-  loadQuestion();
+  location.reload();
 }
 
 function updateProgress() {
   document.getElementById("counter").textContent = `Question ${current+1}/${questions.length}`;
   document.getElementById("progressBar").style.width = `${((current)/questions.length)*100}%`;
+}
+
+// Question grid
+const gridDiv = document.getElementById("questionsGrid");
+questions.forEach((q, idx) => {
+  const btn = document.createElement("button");
+  btn.textContent = idx+1;
+  btn.onclick = () => {
+    current = idx;
+    loadQuestion();
+  };
+  gridDiv.appendChild(btn);
+});
+
+function highlightCurrentQuestionButton() {
+  document.querySelectorAll(".questions-grid button").forEach((btn, idx) => {
+    btn.style.background = idx === current ? "#4caf50" : "#eee";
+    btn.style.color = idx === current ? "#fff" : "#222";
+  });
 }
 
 // Initialize
