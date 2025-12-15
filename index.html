@@ -2,185 +2,165 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project Management Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root {
-  --bg:#f5f5f5;
-  --card:#fff;
-  --text:#222;
-  --correct:#4caf50;
-  --wrong:#f44336;
-  --disabled:#bbb;
-}
-
 body {
-  margin:0;
-  font-family:Segoe UI, sans-serif;
-  background:var(--bg);
-  display:flex;
-  justify-content:center;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
 }
 
 .container {
-  max-width:480px;
-  width:100%;
-  background:var(--card);
-  padding:20px;
-  margin:10px;
-  border-radius:16px;
-  box-shadow:0 10px 20px rgba(0,0,0,.15);
+  background: #fff;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,.15);
 }
 
-.header {
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
+#counter {
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .question {
-  font-size:1.1em;
-  margin-bottom:10px;
+  font-size: 1.1em;
+  margin-bottom: 12px;
 }
 
 .question img {
-  width:100%;
-  margin-top:10px;
-  border-radius:12px;
+  max-width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
 }
 
 .options button {
-  width:100%;
-  margin:6px 0;
-  padding:12px;
-  font-size:1em;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  background:#eee;
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
 }
 
 .options button.correct {
-  background:var(--correct);
-  color:#fff;
+  background: #4caf50;
+  color: #fff;
 }
 
 .options button.wrong {
-  background:var(--wrong);
-  color:#fff;
+  background: #f44336;
+  color: #fff;
 }
 
 .options button.disabled {
-  background:var(--disabled);
-  cursor:not-allowed;
+  background: #ccc;
+  color: #444;
 }
 
 #nextBtn {
-  margin-top:10px;
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#4caf50;
-  color:#fff;
-  font-size:1em;
-  cursor:pointer;
+  margin-top: 10px;
+  padding: 12px;
+  width: 100%;
+  font-size: 1em;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-  <div class="header">
-    <div id="counter">Question</div>
-  </div>
-
-  <div class="question" id="question"></div>
+  <div id="counter"></div>
+  <div class="question" id="question">Loading…</div>
   <div class="options" id="options"></div>
-
   <button id="nextBtn" disabled>Next Question</button>
 </div>
 
-<!-- MUST LOAD FIRST -->
+<!-- IMPORTANT ORDER -->
 <script src="questions.js"></script>
-
 <script>
-let current = 0;
-let score = 0;
+document.addEventListener("DOMContentLoaded", () => {
 
-const questionDiv = document.getElementById("question");
-const optionsDiv = document.getElementById("options");
-const nextBtn = document.getElementById("nextBtn");
-const counter = document.getElementById("counter");
-
-/* HARD SAFETY CHECK */
-if (!window.questions || !questions.length) {
-  questionDiv.innerText = "questions.js not loaded";
-  throw new Error("questions.js missing");
-}
-
-function loadQuestion() {
-  const q = questions[current];
-
-  // TEXT ALWAYS FIRST
-  questionDiv.textContent = q.q;
-
-  // IMAGE ONLY IF EXISTS
-  if (q.img) {
-    const img = document.createElement("img");
-    img.src = q.img;
-    questionDiv.appendChild(img);
+  if (!window.questions || !questions.length) {
+    document.getElementById("question").innerText =
+      "❌ questions.js not loaded";
+    return;
   }
 
-  optionsDiv.innerHTML = "";
-  nextBtn.disabled = true;
+  let current = 0;
+  let score = 0;
 
-  q.options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.textContent = opt;
-    btn.onclick = () => checkAnswer(btn, opt);
-    optionsDiv.appendChild(btn);
-  });
+  const questionDiv = document.getElementById("question");
+  const optionsDiv = document.getElementById("options");
+  const counterDiv = document.getElementById("counter");
+  const nextBtn = document.getElementById("nextBtn");
 
-  counter.textContent = `Question ${current + 1} / ${questions.length}`;
-}
+  function loadQuestion() {
+    const q = questions[current];
 
-function checkAnswer(btn, selected) {
-  const q = questions[current];
-  const buttons = document.querySelectorAll(".options button");
+    // FORCE TEXT
+    questionDiv.textContent = q.q;
 
-  buttons.forEach(b => {
-    b.disabled = true;
-    b.classList.add("disabled");
-
-    if (b.textContent === q.answer) {
-      b.classList.add("correct");
+    // IMAGE ONLY IF PRESENT
+    if (q.img) {
+      const img = document.createElement("img");
+      img.src = q.img;
+      questionDiv.appendChild(img);
     }
-  });
 
-  if (selected !== q.answer) {
-    btn.classList.remove("correct");
-    btn.classList.add("wrong");
-  } else {
-    score++;
-  }
-
-  nextBtn.disabled = false;
-}
-
-nextBtn.onclick = () => {
-  current++;
-  if (current < questions.length) {
-    loadQuestion();
-  } else {
-    questionDiv.innerHTML = `<h2>Finished</h2><p>Score: ${score}/${questions.length}</p>`;
     optionsDiv.innerHTML = "";
-    nextBtn.style.display = "none";
-  }
-};
+    q.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(btn, opt);
+      optionsDiv.appendChild(btn);
+    });
 
-loadQuestion();
+    counterDiv.textContent =
+      `Question ${current + 1} / ${questions.length}`;
+
+    nextBtn.disabled = true;
+  }
+
+  function checkAnswer(clickedBtn, selected) {
+    const q = questions[current];
+    const buttons = document.querySelectorAll(".options button");
+
+    buttons.forEach(b => {
+      b.disabled = true;
+
+      if (b.textContent === q.answer) {
+        b.classList.add("correct");
+      } else if (b === clickedBtn) {
+        b.classList.add("wrong");
+      } else {
+        b.classList.add("disabled");
+      }
+    });
+
+    if (selected === q.answer) score++;
+    nextBtn.disabled = false;
+  }
+
+  nextBtn.onclick = () => {
+    current++;
+    if (current < questions.length) {
+      loadQuestion();
+    } else {
+      questionDiv.innerHTML = `<h3>Finished</h3>
+        <p>Score: ${score} / ${questions.length}</p>`;
+      optionsDiv.innerHTML = "";
+      nextBtn.style.display = "none";
+    }
+  };
+
+  loadQuestion();
+});
 </script>
 </body>
 </html>
