@@ -160,7 +160,7 @@
 <body>
 <div class="container">
   <div class="header">
-    <div id="counter">Loading questions...</div>
+    <div id="counter"></div>
     <button class="dark-toggle" onclick="toggleDarkMode()">Dark Mode</button>
   </div>
 
@@ -171,7 +171,7 @@
     <div class="progress-bar" id="progressBar"></div>
   </div>
 
-  <div class="question" id="question">Loading questions...</div>
+  <div class="question" id="question"></div>
   <div class="options" id="options"></div>
 
   <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
@@ -189,9 +189,9 @@ function loadQuestion() {
   const questionDiv = document.getElementById("question");
   questionDiv.innerHTML = q.q;
 
-  // Only show image if it exists
+  // Remove old image
   questionDiv.querySelectorAll("img").forEach(img => img.remove());
-  if(q.img){
+  if(q.img) {
     const img = document.createElement("img");
     img.src = q.img;
     questionDiv.appendChild(img);
@@ -256,13 +256,11 @@ function updateProgress() {
 }
 
 function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
-
 function toggleQuestionsGrid() {
   const grid = document.getElementById("questionsGrid");
   grid.style.display = grid.style.display==="block" ? "none" : "block";
 }
 
-// Populate questions grid
 const gridDiv = document.getElementById("questionsGrid");
 questions.forEach((q, idx)=>{
   const btn = document.createElement("button");
@@ -275,7 +273,7 @@ questions.forEach((q, idx)=>{
   gridDiv.appendChild(btn);
 });
 
-// Load first question
+// Load first question immediately
 loadQuestion();
 </script>
 </body>
