@@ -32,8 +32,10 @@
   .questions-grid { display:none; max-height:180px; overflow-y:auto; margin-bottom:10px; flex-wrap:wrap; }
   .questions-grid button { width:40px; height:40px; margin:3px; border-radius:8px; border:none; cursor:pointer; background-color:var(--card-color); color:var(--text-color); box-shadow:0 2px 5px rgba(0,0,0,0.1); font-size:0.9em; }
   .questions-grid button:hover { background-color:var(--option-hover); }
+  .questions-grid button.answered { background-color:var(--correct-color); color:#fff; }
 
   body.dark-mode .questions-grid button { background-color:#2a2a2a; color:#eee; }
+  body.dark-mode .questions-grid button.answered { background-color:#4caf50; }
 
   .progress-container { width:100%; background-color:#ddd; border-radius:20px; height:15px; overflow:hidden; margin-bottom:15px; }
   .progress-bar { height:100%; width:0%; background-color:#4caf50; border-radius:20px; transition:width 0.3s ease; }
@@ -82,18 +84,17 @@
 
 <script src="questions.js"></script>
 <script>
-let current=0;
-let score=0;
+let current = 0;
+let score = 0;
+const imageQuestions = [102, 127, 128, 293, 320, 361, 366];
+const answeredQuestions = new Set();
 
-// Questions with images only for specified ones
-const imageQuestions = [102,127,128,293,320,361];
-
-function loadQuestion(){
+function loadQuestion() {
   const q = questions[current];
   const questionDiv = document.getElementById("question");
   questionDiv.innerHTML = q.q;
 
-  // Only show image if question is in the list
+  // Add image if applicable
   if(imageQuestions.includes(current+1) && q.img){
     const img = document.createElement("img");
     img.src = q.img;
@@ -102,80 +103,91 @@ function loadQuestion(){
 
   const optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML="";
-  q.options.forEach(opt=>{
+  q.options.forEach(opt => {
     const btn = document.createElement("button");
-    btn.innerText=opt;
-    btn.onclick=()=>checkAnswer(btn,opt);
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(btn, opt);
     optionsDiv.appendChild(btn);
   });
 
-  document.getElementById("nextBtn").disabled=true;
+  document.getElementById("nextBtn").disabled = true;
   updateProgress();
+  updateQuestionGrid();
 }
 
-function checkAnswer(btn,selected){
+function checkAnswer(btn, selected) {
   const q = questions[current];
   const buttons = document.querySelectorAll(".options button");
-  buttons.forEach(b=>{
-    b.disabled=true;
-    if(b.innerText===q.answer) b.classList.add("correct");
-    else if(b.innerText===selected) b.classList.add("wrong");
+  buttons.forEach(b => {
+    b.disabled = true;
+    if(b.innerText === q.answer) b.classList.add("correct");
+    else if(b.innerText === selected) b.classList.add("wrong");
   });
-  if(selected===q.answer) score++;
-  document.getElementById("nextBtn").disabled=false;
+  if(selected === q.answer) score++;
+  answeredQuestions.add(current);
+  document.getElementById("nextBtn").disabled = false;
+  updateQuestionGrid();
 }
 
-function nextQuestion(){
+function nextQuestion() {
   current++;
-  if(current<questions.length) loadQuestion();
-  else document.querySelector(".container").innerHTML=`
+  if(current < questions.length) loadQuestion();
+  else showResults();
+}
+
+function loadRandomQuestion() {
+  if(questions.length <= 1) return;
+  let randomIndex;
+  do {
+    randomIndex = Math.floor(Math.random()*questions.length);
+  } while(randomIndex === current);
+  current = randomIndex;
+  loadQuestion();
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  answeredQuestions.clear();
+  loadQuestion();
+  buildQuestionGrid();
+}
+
+function showResults() {
+  document.querySelector(".container").innerHTML = `
     <h2>Quiz Finished!</h2>
     <p>Your Score: ${score} / ${questions.length}</p>
     <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
   `;
 }
 
-function loadRandomQuestion(){
-  if(questions.length<=1) return;
-  let randomIndex;
-  do{
-    randomIndex=Math.floor(Math.random()*questions.length);
-  } while(randomIndex===current);
-  current=randomIndex;
-  loadQuestion();
+function updateProgress() {
+  document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
+  document.getElementById("progressBar").style.width = `${(current / questions.length)*100}%`;
 }
 
-function restartQuiz(){
-  current=0;
-  score=0;
-  loadQuestion();
-  buildQuestionGrid();
+function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
+function toggleQuestionsGrid() {
+  const grid = document.getElementById("questionsGrid");
+  grid.style.display = grid.style.display === "block" ? "none" : "block";
 }
 
-function updateProgress(){
-  document.getElementById("counter").innerText=`Question ${current+1}/${questions.length}`;
-  document.getElementById("progressBar").style.width=`${((current)/questions.length)*100}%`;
-}
-
-function toggleDarkMode(){ document.body.classList.toggle("dark-mode"); }
-
-function toggleQuestionsGrid(){
-  const grid=document.getElementById("questionsGrid");
-  grid.style.display=grid.style.display==="block"?"none":"block";
-}
-
-function buildQuestionGrid(){
-  const gridDiv=document.getElementById("questionsGrid");
-  gridDiv.innerHTML="";
-  questions.forEach((q,idx)=>{
-    const btn=document.createElement("button");
-    btn.innerText=idx+1;
-    btn.onclick=()=>{
-      current=idx;
-      loadQuestion();
-      gridDiv.style.display="none";
-    };
+function buildQuestionGrid() {
+  const gridDiv = document.getElementById("questionsGrid");
+  gridDiv.innerHTML = "";
+  questions.forEach((q, idx) => {
+    const btn = document.createElement("button");
+    btn.innerText = idx+1;
+    btn.onclick = () => { current = idx; loadQuestion(); gridDiv.style.display="none"; };
     gridDiv.appendChild(btn);
+  });
+}
+
+function updateQuestionGrid() {
+  const gridDiv = document.getElementById("questionsGrid");
+  const buttons = gridDiv.querySelectorAll("button");
+  buttons.forEach((btn, idx) => {
+    btn.classList.toggle("answered", answeredQuestions.has(idx));
   });
 }
 
