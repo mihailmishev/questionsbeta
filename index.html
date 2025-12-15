@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project Management Quiz</title>
+<style>
+  :root {
+    --bg-color: #f5f5f5;
+    --text-color: #222;
+    --card-color: #fff;
+    --correct-color: #4caf50;
+    --wrong-color: #f44336;
+    --disabled-opacity: 0.5;
+    --option-color: #888;
+    --option-hover: #eee;
+    --next-btn-color: #4caf50;
+    --restart-btn-color: #888;
+    --show-questions-color: #4caf50;
+  }
+
+  body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #eee;
+    --card-color: #1e1e1e;
+    --option-color: #bbb;
+    --option-hover: #333;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .container {
+    background-color: var(--card-color);
+    padding: 30px;
+    border-radius: 16px;
+    max-width: 900px;
+    width: 100%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  }
+
+  .question {
+    font-size: 1.3em;
+    margin-bottom: 20px;
+  }
+
+  .options button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 14px;
+    font-size: 1em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: var(--card-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  }
+
+  .options button:hover:not(:disabled) {
+    background-color: var(--option-hover);
+  }
+
+  .options button.correct {
+    background-color: var(--correct-color);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .options button.wrong {
+    background-color: var(--wrong-color);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .options button.disabled {
+    opacity: var(--disabled-opacity);
+    cursor: not-allowed;
+  }
+
+  #nextBtn {
+    margin-top: 20px;
+    padding: 14px 24px;
+    font-size: 1em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: var(--next-btn-color);
+    color: #fff;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  #nextBtn:hover {
+    background-color: #45a049;
+  }
+
+  #restartBtn {
+    margin-top: 10px;
+    padding: 12px 24px;
+    font-size: 0.95em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: var(--restart-btn-color);
+    color: #fff;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  }
+
+  #restartBtn:hover {
+    background-color: #666;
+  }
+
+  .progress-container {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    height: 20px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #4caf50;
+    border-radius: 20px;
+    transition: width 0.3s ease;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .dark-toggle {
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid var(--text-color);
+    border-radius: 8px;
+    padding: 5px 10px;
+    color: var(--text-color);
+    font-size: 0.9em;
+  }
+
+  .show-questions-btn {
+    padding: 10px 14px;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: var(--card-color);
+    color: var(--text-color);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .show-questions-btn:hover {
+    background-color: var(--option-hover);
+  }
+
+  .questions-grid {
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 12px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  }
+
+  .questions-grid button {
+    width: 40px;
+    height: 40px;
+    margin: 4px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: var(--card-color);
+    color: var(--text-color);
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .questions-grid button:hover {
+    background-color: var(--option-hover);
+  }
+
+  body.dark-mode .options button {
+    color: #eee;
+  }
+
+  body.dark-mode .questions-grid button {
+    color: #eee;
+  }
+
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div id="counter">Question 1/101</div>
+    <button class="dark-toggle" onclick="toggleDarkMode()">Dark Mode</button>
+  </div>
+
+  <button class="show-questions-btn" onclick="toggleQuestionsGrid()">Show Questions</button>
+  <div class="questions-grid" id="questionsGrid"></div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="question" id="question"></div>
+  <div class="options" id="options"></div>
+
+  <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+  <div class="restart-container">
+    <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script>
+let current = 0;
+let score = 0;
+
+function loadQuestion() {
+  const q = questions[current];
+  document.getElementById("question").innerText = q.q;
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+  q.options.forEach(opt=>{
+    const btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = ()=>checkAnswer(btn,opt);
+    optionsDiv.appendChild(btn);
+  });
+  document.getElementById("nextBtn").disabled = true;
+  updateProgress();
+}
+
+function checkAnswer(btn, selected) {
+  const q = questions[current];
+  const buttons = document.querySelectorAll(".options button");
+  buttons.forEach(b=>{
+    b.disabled = true;
+    if(b.innerText===q.answer) b.classList.add("correct");
+    else if(b.innerText===selected) b.classList.add("wrong");
+  });
+  if(selected===q.answer) score++;
+  document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQuestion() {
+  current++;
+  if(current<questions.length) {
+    loadQuestion();
+  } else {
+    document.querySelector(".container").innerHTML = `
+      <h2>Quiz Finished!</h2>
+      <p>Your Score: ${score} / ${questions.length}</p>
+      <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
+    `;
+  }
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  location.reload(); // simple way to reset everything
+}
+
+function updateProgress() {
+  document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
+  document.getElementById("progressBar").style.width = `${((current)/questions.length)*100}%`;
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
+function toggleQuestionsGrid() {
+  const grid = document.getElementById("questionsGrid");
+  if(grid.style.display === "block") {
+    grid.style.display = "none";
+  } else {
+    grid.style.display = "block";
+    renderQuestionsGrid();
+  }
+}
+
+function renderQuestionsGrid() {
+  const grid = document.getElementById("questionsGrid");
+  grid.innerHTML = "";
+  questions.forEach((q,i)=>{
+    const btn = document.createElement("button");
+    btn.innerText = i+1;
+    btn.onclick = () => { 
+      current = i; 
+      loadQuestion();
+      grid.style.display = "none"; 
+    };
+    grid.appendChild(btn);
+  });
+}
+
+loadQuestion();
+</script>
+</body>
+</html>
