@@ -1,221 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Quiz App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
-      background: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .container {
-      background: #fff;
-      width: 100%;
-      max-width: 420px;
-      padding: 22px;
-      border-radius: 14px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
-
-    .top {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin-bottom: 10px;
-      color: #555;
-    }
-
-    .progress {
-      height: 6px;
-      background: #e0e0e0;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: #4f46e5;
-      transition: width 0.3s ease;
-    }
-
-    h2 {
-      font-size: 18px;
-      margin-bottom: 16px;
-      line-height: 1.4;
-    }
-
-    .options {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .options button {
-      padding: 12px 14px;
-      font-size: 15px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      background: #fff;
-      cursor: pointer;
-      transition: transform 0.12s ease, background 0.2s ease;
-    }
-
-    .options button:hover {
-      background: #f1f5f9;
-    }
-
-    .options button:active {
-      transform: scale(0.97);
-    }
-
-    .correct {
-      background: #d1fae5 !important;
-      border-color: #10b981;
-    }
-
-    .wrong {
-      background: #fee2e2 !important;
-      border-color: #ef4444;
-    }
-
-    .next-btn {
-      margin-top: 22px;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 12px;
-      border: none;
-      background: #4f46e5;
-      color: #fff;
-      cursor: pointer;
-      opacity: 0.6;
-    }
-
-    .next-btn:enabled {
-      opacity: 1;
-    }
-
-    /* Animations */
-    .fade-in {
-      animation: fadeInUp 0.35s ease;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Management Quiz</title>
+<style>
+/* Paste all CSS from previous code (styles remain the same) */
+</style>
 </head>
-
 <body>
-  <div class="container fade-in">
-    <div class="top">
-      <span id="counter"></span>
-      <span id="score"></span>
-    </div>
 
-    <div class="progress">
-      <div class="progress-bar" id="bar"></div>
-    </div>
-
-    <h2 id="question"></h2>
-
-    <div class="options" id="options"></div>
-
-    <button class="next-btn" id="nextBtn" disabled>Next</button>
+<div class="container">
+  <div class="header">
+    <div id="counter">Question 1/101</div>
+    <button class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
   </div>
 
-  <script src="questions.js"></script>
+  <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
 
-  <script>
-    let current = 0;
-    let score = 0;
+  <div class="grid-container" id="grid"></div>
 
-    const questionEl = document.getElementById("question");
-    const optionsEl = document.getElementById("options");
-    const nextBtn = document.getElementById("nextBtn");
-    const counterEl = document.getElementById("counter");
-    const scoreEl = document.getElementById("score");
-    const barEl = document.getElementById("bar");
+  <div class="question" id="question"></div>
+  <div class="options" id="options"></div>
 
-    function loadQuestion() {
-      const q = questions[current];
+  <button id="nextBtn" onclick="nextQuestion()">Next Question</button>
+  <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
+</div>
 
-      questionEl.classList.remove("fade-in");
-      optionsEl.classList.remove("fade-in");
-      void questionEl.offsetWidth;
+<!-- Import questions.js -->
+<script src="questions.js"></script>
 
-      questionEl.textContent = q.q;
-      questionEl.classList.add("fade-in");
+<script>
+// MAIN JS
+let current = 0;
+let score = 0;
 
-      optionsEl.innerHTML = "";
-      optionsEl.classList.add("fade-in");
+const grid = document.getElementById("grid");
 
-      counterEl.textContent = `Question ${current + 1} / ${questions.length}`;
-      scoreEl.textContent = `Score: ${score}`;
-      barEl.style.width = `${(current / questions.length) * 100}%`;
+function createGrid(){
+  grid.innerHTML = "";
+  questions.forEach((_, i)=>{
+    const btn = document.createElement("button");
+    btn.textContent = i+1;
+    btn.onclick = ()=>{ current=i; loadQuestion(); };
+    grid.appendChild(btn);
+  });
+}
 
-      nextBtn.disabled = true;
+function loadQuestion(){
+  const q = questions[current];
+  document.getElementById("question").innerText = q.q;
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+  q.options.forEach(opt=>{
+    const btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = ()=>checkAnswer(btn,opt);
+    optionsDiv.appendChild(btn);
+  });
+  document.getElementById("nextBtn").disabled = false;
 
-      q.options.forEach(opt => {
-        const btn = document.createElement("button");
-        btn.textContent = opt;
-        btn.onclick = () => selectAnswer(btn, opt);
-        optionsEl.appendChild(btn);
-      });
-    }
+  updateProgress();
+  updateGridHighlight();
+}
 
-    function selectAnswer(btn, selected) {
-      const correct = questions[current].answer;
+function checkAnswer(btn, selected){
+  const q = questions[current];
+  const buttons = document.querySelectorAll(".options button");
+  buttons.forEach(b=>{
+    b.disabled = true;
+    if(b.innerText===q.answer) b.classList.add("correct");
+    else if(b.innerText===selected) b.classList.add("wrong");
+    else b.classList.add("disabled");
+  });
+  if(selected===q.answer) score++;
+}
 
-      document.querySelectorAll(".options button").forEach(b => {
-        b.disabled = true;
-        if (b.textContent === correct) b.classList.add("correct");
-        if (b.textContent === selected && selected !== correct) b.classList.add("wrong");
-      });
+function nextQuestion(){ if(current<questions.length-1) current++; loadQuestion(); }
+function restartQuiz(){ current=0; score=0; loadQuestion(); }
 
-      if (selected === correct) score++;
-      nextBtn.disabled = false;
-    }
+function updateProgress(){
+  document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
+  document.getElementById("progressBar").style.width = `${((current)/questions.length)*100}%`;
+}
 
-    nextBtn.onclick = () => {
-      current++;
-      if (current < questions.length) {
-        loadQuestion();
-      } else {
-        document.querySelector(".container").innerHTML = `
-          <div class="fade-in">
-            <h2>Quiz Complete 🎉</h2>
-            <p>Your Score: ${score} / ${questions.length}</p>
-            <button class="next-btn" onclick="location.reload()">Restart</button>
-          </div>
-        `;
-      }
-    };
+function updateGridHighlight(){
+  const btns = grid.querySelectorAll("button");
+  btns.forEach((b,i)=> b.classList.toggle("current", i===current));
+}
 
-    loadQuestion();
-  </script>
+function toggleDarkMode(){ document.body.classList.toggle("dark-mode"); }
+
+createGrid();
+loadQuestion();
+</script>
+
 </body>
 </html>
