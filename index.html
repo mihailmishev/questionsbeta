@@ -2,165 +2,243 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project Management Quiz</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-}
+  :root {
+    --bg-color: #f5f5f5;
+    --text-color: #222;
+    --card-color: #fff;
+    --correct-color: #4caf50;
+    --wrong-color: #f44336;
+    --disabled-opacity: 0.5;
+    --option-hover: #eee;
+    --next-btn-color: #4caf50;
+    --restart-btn-color: #888;
+    --random-btn-color: #2196F3;
+  }
 
-.container {
-  background: #fff;
-  width: 100%;
-  max-width: 480px;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,.15);
-}
+  body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #eee;
+    --card-color: #1e1e1e;
+    --option-hover: #333;
+  }
 
-#counter {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
+  body {
+    margin: 0;
+    padding: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
 
-.question {
-  font-size: 1.1em;
-  margin-bottom: 12px;
-}
+  .container {
+    background-color: var(--card-color);
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+  }
 
-.question img {
-  max-width: 100%;
-  border-radius: 10px;
-  margin-top: 10px;
-}
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
 
-.options button {
-  width: 100%;
-  padding: 12px;
-  margin: 6px 0;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-size: 1em;
-}
+  .dark-toggle {
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid var(--text-color);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    color: var(--text-color);
+  }
 
-.options button.correct {
-  background: #4caf50;
-  color: #fff;
-}
+  .progress-container {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 20px;
+    height: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+  }
 
-.options button.wrong {
-  background: #f44336;
-  color: #fff;
-}
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #4caf50;
+    border-radius: 20px;
+    transition: width 0.3s ease;
+  }
 
-.options button.disabled {
-  background: #ccc;
-  color: #444;
-}
+  .question {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+  }
 
-#nextBtn {
-  margin-top: 10px;
-  padding: 12px;
-  width: 100%;
-  font-size: 1em;
-}
+  .question img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 12px;
+  }
+
+  .options button {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: var(--card-color);
+    color: var(--text-color);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .options button:hover:not(:disabled) { background-color: var(--option-hover); }
+
+  .options button.correct { background-color: var(--correct-color); color: #fff; }
+  .options button.wrong { background-color: var(--wrong-color); color: #fff; }
+  .options button.disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
+
+  #nextBtn, #restartBtn, #randomBtn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 12px;
+    cursor: pointer;
+    border: none;
+    margin-top: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+
+  #nextBtn { background-color: var(--next-btn-color); color: #fff; }
+  #nextBtn:hover { background-color: #45a049; }
+
+  #restartBtn { background-color: var(--restart-btn-color); color: #fff; }
+  #restartBtn:hover { background-color: #666; }
+
+  #randomBtn { background-color: var(--random-btn-color); color: #fff; }
+  #randomBtn:hover { background-color: #1976D2; }
 </style>
 </head>
-
 <body>
 <div class="container">
-  <div id="counter"></div>
-  <div class="question" id="question">Loading…</div>
+  <div class="header">
+    <div id="counter">Question 1/1</div>
+    <button class="dark-toggle" onclick="toggleDarkMode()">Dark Mode</button>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="question" id="question"></div>
   <div class="options" id="options"></div>
-  <button id="nextBtn" disabled>Next Question</button>
+
+  <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+  <button id="randomBtn" onclick="loadRandomQuestion()">Random Question</button>
+  <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
 </div>
 
-<!-- IMPORTANT ORDER -->
+<!-- Load questions.js -->
 <script src="questions.js"></script>
+
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+let current = 0;
+let score = 0;
 
-  if (!window.questions || !questions.length) {
-    document.getElementById("question").innerText =
-      "❌ questions.js not loaded";
-    return;
-  }
-
-  let current = 0;
-  let score = 0;
-
+function loadQuestion() {
+  const q = questions[current];
   const questionDiv = document.getElementById("question");
+  questionDiv.innerHTML = q.q;
+
+  // Only show image if it exists
+  if (q.img) {
+    const img = document.createElement("img");
+    img.src = q.img;
+    questionDiv.appendChild(img);
+  }
+
   const optionsDiv = document.getElementById("options");
-  const counterDiv = document.getElementById("counter");
-  const nextBtn = document.getElementById("nextBtn");
+  optionsDiv.innerHTML = "";
+  q.options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(btn, opt);
+    optionsDiv.appendChild(btn);
+  });
 
-  function loadQuestion() {
-    const q = questions[current];
+  document.getElementById("nextBtn").disabled = true;
+  updateProgress();
+}
 
-    // FORCE TEXT
-    questionDiv.textContent = q.q;
+function checkAnswer(btn, selected) {
+  const q = questions[current];
+  const buttons = document.querySelectorAll(".options button");
 
-    // IMAGE ONLY IF PRESENT
-    if (q.img) {
-      const img = document.createElement("img");
-      img.src = q.img;
-      questionDiv.appendChild(img);
-    }
+  buttons.forEach(b => {
+    b.disabled = true;
+    b.classList.add("disabled");
+    if (b.innerText === q.answer) b.classList.add("correct");
+    else if (b.innerText === selected) b.classList.add("wrong");
+  });
 
-    optionsDiv.innerHTML = "";
-    q.options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.textContent = opt;
-      btn.onclick = () => checkAnswer(btn, opt);
-      optionsDiv.appendChild(btn);
-    });
+  if (selected === q.answer) score++;
+  document.getElementById("nextBtn").disabled = false;
+}
 
-    counterDiv.textContent =
-      `Question ${current + 1} / ${questions.length}`;
+function nextQuestion() {
+  current++;
+  if(current < questions.length) loadQuestion();
+  else document.querySelector(".container").innerHTML = `
+    <h2>Quiz Finished!</h2>
+    <p>Your Score: ${score} / ${questions.length}</p>
+    <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
+  `;
+}
 
-    nextBtn.disabled = true;
-  }
-
-  function checkAnswer(clickedBtn, selected) {
-    const q = questions[current];
-    const buttons = document.querySelectorAll(".options button");
-
-    buttons.forEach(b => {
-      b.disabled = true;
-
-      if (b.textContent === q.answer) {
-        b.classList.add("correct");
-      } else if (b === clickedBtn) {
-        b.classList.add("wrong");
-      } else {
-        b.classList.add("disabled");
-      }
-    });
-
-    if (selected === q.answer) score++;
-    nextBtn.disabled = false;
-  }
-
-  nextBtn.onclick = () => {
-    current++;
-    if (current < questions.length) {
-      loadQuestion();
-    } else {
-      questionDiv.innerHTML = `<h3>Finished</h3>
-        <p>Score: ${score} / ${questions.length}</p>`;
-      optionsDiv.innerHTML = "";
-      nextBtn.style.display = "none";
-    }
-  };
-
+function loadRandomQuestion() {
+  if (questions.length <= 1) return;
+  let randomIndex;
+  do {
+    randomIndex = Math.floor(Math.random() * questions.length);
+  } while(randomIndex === current);
+  current = randomIndex;
   loadQuestion();
-});
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  loadQuestion();
+}
+
+function updateProgress() {
+  document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
+  document.getElementById("progressBar").style.width = `${((current)/questions.length)*100}%`;
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
+// Initialize
+loadQuestion();
 </script>
 </body>
 </html>
