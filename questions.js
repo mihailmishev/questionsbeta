@@ -302,5 +302,4 @@ const questions = [
 {"q":"A logical relationship in which a successor activity cannot start until a predecessor activity has finished is known as:","options":["Start-to-start (SS)","Start-to-finish (SF)","Finish-to-start (FS)","Finish-to-finish (FF)"],"answer":"C"},
 {"q":"Which of the following tools and techniques are utilized in the Close Project or Phase process?","options":["Project management information system","Product analysis","Expert judgment","Inspection"],"answer":"C"},
 {"q":"An input to Close Project or Phase is:","options":["Accepted deliverables","Final products or services","Document updates","Work performance information"],"answer":"A"}
-]
 ];
