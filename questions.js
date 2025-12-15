@@ -199,7 +199,7 @@ const questions = [
 {"q":"Which tool estimates schedule uncertainty?","options":["Decision tree","Monte Carlo analysis","Pareto chart","Histogram"],"answer":"B"},
 {"q":"Which process monitors stakeholder relationships?","options":["Manage Stakeholder Engagement","Control Stakeholder Engagement","Identify Stakeholders","Plan Stakeholder Management"],"answer":"B"},
 {"q":"Which document contains approved scope, schedule, and cost baselines?","options":["Project charter","Project management plan","Scope statement","WBS dictionary"],"answer":"B"},
-{"q":"The chart below is an example of a:","options":["Responsibility assignment matrix (RAM)","Work breakdown structure (WBS)","RACI chart","Requirements traceability matrix"],"answer":"D"}
+{"q":"The chart below is an example of a:","options":["Responsibility assignment matrix (RAM)","Work breakdown structure (WBS)","RACI chart","Requirements traceability matrix"],"answer":"D"},
 {"q":"Which estimating technique uses actual costs of previous similar projects?","options":["Analogous","Parametric","Bottom-up","Top-down"],"answer":"A"},
 {"q":"Which schedule network analysis technique is applied when critical path is calculated and resources are critical?","options":["Applying calendars","Resource leveling","Resource planning","Resource conflict management"],"answer":"B"},
 {"q":"Plan-do-check-act is also known as:","options":["Prevention over inspection","Statistical sampling","Management responsibility","Continuous improvement"],"answer":"D"},
@@ -214,7 +214,7 @@ const questions = [
 {"q":"Change requests are an output from which Project Integration Management process?","options":["Direct and Manage Project Execution","Develop Project Management Plan","Close Project","Develop Project Charter"],"answer":"A"},
 {"q":"Which Perform Quality Control tool graphically represents system elements interrelation?","options":["Control chart","Flowchart","Run chart","Pareto chart"],"answer":"B"},
 {"q":"What happens to a stakeholder's project influence over time?","options":["Increases","Decreases","Stays the same","Has no bearing"],"answer":"B"},
-{"q":"A measure of cost performance required to meet a goal with remaining resources is:","options":["Budget at Completion (BAC)","Earned Value Management (EVM)","To-Complete Performance Index (TCPI)","Cost Performance Index (CPI)"],"answer":"C"},
+{"q":"A measure of cost performance required to meet a goal with remaining resources is:","options": ["Budget at Completion (BAC)","Earned Value Management (EVM)","To-Complete Performance Index (TCPI)","Cost Performance Index (CPI)"],"answer":"C"},
 {"q":"The Monitoring and Controlling Process Group includes processes that:","options":["Establish scope, objectives, and course of action","Define a new project or phase","Track, review, and regulate progress","Complete work defined in PM plan"],"answer":"C"},
 {"q":"Which analysis determines the cause and degree of difference between baseline and actual performance?","options":["Schedule network analysis","Reserve analysis","Alternative analysis","Variance analysis"],"answer":"D"},
 {"q":"The cost performance baseline is typically displayed in the form of:","options":["S-curve","Normal curve","U-curve","Positive slope line"],"answer":"A"},
