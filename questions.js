@@ -1,4 +1,4 @@
-const questions = [
+const q = [
   {
     #: "1",
     Question: "Which process determines the risks that might affect the project?",
@@ -3659,4 +3659,4 @@ const questions = [
     Answer: "A",
     Images: ""
   }
-]
+];
