@@ -72,7 +72,7 @@ let current = 0;
 let score = 0;
 const answeredQuestions = new Set();
 
-// Map specific question numbers to images
+// Map real question numbers to images
 const questionImages = {
   102: "images/q102.jpg",
   127: "images/q127.jpg",
@@ -82,13 +82,19 @@ const questionImages = {
   361: "images/q361.jpg"
 };
 
-// Load question with optional image
+// Optional: map array index → actual question number
+// If your array starts at question 1 sequentially, you can use index + 1
+function getQuestionNumber(index) {
+  return index + 1; // replace with mapping if your questions array is not sequential
+}
+
+// Load question
 function loadQuestion() {
   const q = questions[current];
   const questionDiv = document.getElementById("question");
   questionDiv.innerHTML = q.q;
 
-  const questionNumber = current + 1;
+  const questionNumber = getQuestionNumber(current);
   if (questionImages[questionNumber]) {
     const img = document.createElement("img");
     img.src = questionImages[questionNumber];
