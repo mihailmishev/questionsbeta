@@ -16,46 +16,30 @@
     --restart-btn-color: #888;
     --random-btn-color: #2196F3;
   }
-
   body.dark-mode { --bg-color:#121212; --text-color:#eee; --card-color:#1e1e1e; --option-hover:#333; }
-
   body { margin:0; padding:10px; font-family:sans-serif; background-color:var(--bg-color); color:var(--text-color); display:flex; justify-content:center; min-height:100vh; }
-
   .container { background-color:var(--card-color); width:100%; max-width:480px; padding:20px; border-radius:16px; box-shadow:0 10px 20px rgba(0,0,0,0.15); display:flex; flex-direction:column; }
-
   .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
   .dark-toggle { cursor:pointer; background-color:transparent; border:1px solid var(--text-color); border-radius:8px; padding:5px 10px; font-size:0.9em; color:var(--text-color); }
-
   #showQuestionsBtn { padding:8px 12px; font-size:0.9em; border-radius:12px; cursor:pointer; margin-bottom:10px; background-color:var(--card-color); border:none; transition:all 0.3s ease; align-self:flex-start; }
   #showQuestionsBtn:hover { background-color:var(--option-hover); }
-
   .questions-grid { display:none; max-height:180px; overflow-y:auto; margin-bottom:10px; flex-wrap:wrap; }
   .questions-grid button { width:40px; height:40px; margin:3px; border-radius:8px; border:none; cursor:pointer; background-color:var(--card-color); color:var(--text-color); box-shadow:0 2px 5px rgba(0,0,0,0.1); font-size:0.9em; }
   .questions-grid button:hover { background-color:var(--option-hover); }
   .questions-grid button.answered { background-color:var(--correct-color); color:#fff; }
-
   body.dark-mode .questions-grid button { background-color:#2a2a2a; color:#eee; }
   body.dark-mode .questions-grid button.answered { background-color:#4caf50; }
-
   .progress-container { width:100%; background-color:#ddd; border-radius:20px; height:15px; overflow:hidden; margin-bottom:15px; }
   .progress-bar { height:100%; width:0%; background-color:#4caf50; border-radius:20px; transition:width 0.3s ease; }
-
   .question { font-size:1.1em; margin-bottom:10px; }
   .question img { max-width:100%; height:auto; margin:10px 0; border-radius:12px; }
-
   .options button { display:block; width:100%; margin:8px 0; padding:12px; font-size:1em; border-radius:12px; cursor:pointer; background-color:var(--card-color); color:var(--text-color); box-shadow:0 3px 6px rgba(0,0,0,0.1); border:none; transition:all 0.3s ease; }
   .options button:hover { background-color:var(--option-hover); }
-
-  .options button.correct { background-color:var(--correct-color); color:#fff; }
-  .options button.wrong { background-color:var(--wrong-color); color:#fff; }
-
   #nextBtn, #restartBtn, #randomBtn { width:100%; padding:12px; font-size:1em; border-radius:12px; cursor:pointer; border:none; margin-top:10px; box-shadow:0 3px 6px rgba(0,0,0,0.1); transition:all 0.3s ease; }
   #nextBtn { background-color:var(--next-btn-color); color:#fff; }
   #nextBtn:hover { background-color:#45a049; }
-
   #restartBtn { background-color:var(--restart-btn-color); color:#fff; }
   #restartBtn:hover { background-color:#666; }
-
   #randomBtn { background-color:var(--random-btn-color); color:#fff; }
   #randomBtn:hover { background-color:#1976D2; }
 </style>
@@ -86,23 +70,37 @@
 <script>
 let current = 0;
 let score = 0;
-const imageQuestions = [102, 127, 128, 293, 320, 361, 366];
 const answeredQuestions = new Set();
 
+// Map specific question numbers to images
+const questionImages = {
+  102: "images/q102.jpg",
+  127: "images/q127.jpg",
+  128: "images/q128.jpg",
+  293: "images/q293.jpg",
+  320: "images/q320.jpg",
+  361: "images/q361.jpg"
+};
+
+// Load question with optional image
 function loadQuestion() {
   const q = questions[current];
   const questionDiv = document.getElementById("question");
   questionDiv.innerHTML = q.q;
 
-  // Add image if applicable
-  if(imageQuestions.includes(current+1) && q.img){
+  const questionNumber = current + 1;
+  if (questionImages[questionNumber]) {
     const img = document.createElement("img");
-    img.src = q.img;
+    img.src = questionImages[questionNumber];
+    img.alt = `Question ${questionNumber}`;
+    img.style.maxWidth = "100%";
+    img.style.marginTop = "10px";
+    img.style.borderRadius = "12px";
     questionDiv.appendChild(img);
   }
 
   const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML="";
+  optionsDiv.innerHTML = "";
   q.options.forEach(opt => {
     const btn = document.createElement("button");
     btn.innerText = opt;
@@ -115,6 +113,7 @@ function loadQuestion() {
   updateQuestionGrid();
 }
 
+// Check answer
 function checkAnswer(btn, selected) {
   const q = questions[current];
   const buttons = document.querySelectorAll(".options button");
@@ -129,12 +128,14 @@ function checkAnswer(btn, selected) {
   updateQuestionGrid();
 }
 
+// Next question
 function nextQuestion() {
   current++;
   if(current < questions.length) loadQuestion();
   else showResults();
 }
 
+// Random question
 function loadRandomQuestion() {
   if(questions.length <= 1) return;
   let randomIndex;
@@ -145,6 +146,7 @@ function loadRandomQuestion() {
   loadQuestion();
 }
 
+// Restart
 function restartQuiz() {
   current = 0;
   score = 0;
@@ -153,6 +155,7 @@ function restartQuiz() {
   buildQuestionGrid();
 }
 
+// Show results
 function showResults() {
   document.querySelector(".container").innerHTML = `
     <h2>Quiz Finished!</h2>
@@ -161,17 +164,22 @@ function showResults() {
   `;
 }
 
+// Update progress
 function updateProgress() {
   document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
   document.getElementById("progressBar").style.width = `${(current / questions.length)*100}%`;
 }
 
+// Dark mode
 function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
+
+// Toggle question grid
 function toggleQuestionsGrid() {
   const grid = document.getElementById("questionsGrid");
   grid.style.display = grid.style.display === "block" ? "none" : "block";
 }
 
+// Build question grid
 function buildQuestionGrid() {
   const gridDiv = document.getElementById("questionsGrid");
   gridDiv.innerHTML = "";
@@ -183,6 +191,7 @@ function buildQuestionGrid() {
   });
 }
 
+// Update grid for answered questions
 function updateQuestionGrid() {
   const gridDiv = document.getElementById("questionsGrid");
   const buttons = gridDiv.querySelectorAll("button");
