@@ -35,6 +35,8 @@
   .question img { max-width:100%; height:auto; margin:10px 0; border-radius:12px; display:block; }
   .options button { display:block; width:100%; margin:8px 0; padding:12px; font-size:1em; border-radius:12px; cursor:pointer; background-color:var(--card-color); color:var(--text-color); box-shadow:0 3px 6px rgba(0,0,0,0.1); border:none; transition:all 0.3s ease; position:relative; z-index:1; }
   .options button:hover { background-color:var(--option-hover); }
+  .options button.correct { background-color:var(--correct-color); color:#fff; }
+  .options button.wrong { background-color:var(--wrong-color); color:#fff; }
   #nextBtn, #restartBtn, #randomBtn { width:100%; padding:12px; font-size:1em; border-radius:12px; cursor:pointer; border:none; margin-top:10px; box-shadow:0 3px 6px rgba(0,0,0,0.1); transition:all 0.3s ease; }
   #nextBtn { background-color:var(--next-btn-color); color:#fff; }
   #nextBtn:hover { background-color:#45a049; }
@@ -82,12 +84,12 @@ const questionImages = {
   361: "images/q361.jpg"
 };
 
-// If your array index doesn’t match question number, adjust here
+// Map array index to actual question number (modify if your array isn’t sequential)
 function getQuestionNumber(index) {
-  return index + 1; // modify if necessary
+  return index + 1; 
 }
 
-// Load question and options
+// Load question
 function loadQuestion() {
   const q = questions[current];
   const questionDiv = document.getElementById("question");
@@ -118,16 +120,19 @@ function loadQuestion() {
   updateQuestionGrid();
 }
 
-// Check answer
+// Check answer and show correct/wrong
 function checkAnswer(btn, selected) {
   const q = questions[current];
   const buttons = document.querySelectorAll(".options button");
   buttons.forEach(b => {
     b.disabled = true;
-    if (b.innerText === q.answer) b.classList.add("correct");
-    else if (b.innerText === selected) b.classList.add("wrong");
+    if(b.innerText.trim().toLowerCase() === q.answer.trim().toLowerCase()) {
+      b.classList.add("correct");
+    } else if(b.innerText === selected) {
+      b.classList.add("wrong");
+    }
   });
-  if (selected === q.answer) score++;
+  if(selected.trim().toLowerCase() === q.answer.trim().toLowerCase()) score++;
   answeredQuestions.add(current);
   document.getElementById("nextBtn").disabled = false;
   updateQuestionGrid();
@@ -136,17 +141,17 @@ function checkAnswer(btn, selected) {
 // Next question
 function nextQuestion() {
   current++;
-  if (current < questions.length) loadQuestion();
+  if(current < questions.length) loadQuestion();
   else showResults();
 }
 
 // Random question
 function loadRandomQuestion() {
-  if (questions.length <= 1) return;
+  if(questions.length <= 1) return;
   let randomIndex;
   do {
-    randomIndex = Math.floor(Math.random() * questions.length);
-  } while (randomIndex === current);
+    randomIndex = Math.floor(Math.random()*questions.length);
+  } while(randomIndex === current);
   current = randomIndex;
   loadQuestion();
 }
@@ -169,10 +174,10 @@ function showResults() {
   `;
 }
 
-// Update progress bar
+// Update progress
 function updateProgress() {
-  document.getElementById("counter").innerText = `Question ${current + 1}/${questions.length}`;
-  document.getElementById("progressBar").style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById("counter").innerText = `Question ${current+1}/${questions.length}`;
+  document.getElementById("progressBar").style.width = `${(current / questions.length)*100}%`;
 }
 
 // Dark mode toggle
@@ -190,13 +195,13 @@ function buildQuestionGrid() {
   gridDiv.innerHTML = "";
   questions.forEach((q, idx) => {
     const btn = document.createElement("button");
-    btn.innerText = idx + 1;
-    btn.onclick = () => { current = idx; loadQuestion(); gridDiv.style.display = "none"; };
+    btn.innerText = idx+1;
+    btn.onclick = () => { current = idx; loadQuestion(); gridDiv.style.display="none"; };
     gridDiv.appendChild(btn);
   });
 }
 
-// Update question grid buttons for answered questions
+// Update question grid for answered questions
 function updateQuestionGrid() {
   const gridDiv = document.getElementById("questionsGrid");
   const buttons = gridDiv.querySelectorAll("button");
@@ -205,9 +210,11 @@ function updateQuestionGrid() {
   });
 }
 
-// Initialize quiz
-buildQuestionGrid();
-loadQuestion();
+// Initialize
+window.onload = function() {
+  buildQuestionGrid();
+  loadQuestion();
+};
 </script>
 </body>
 </html>
